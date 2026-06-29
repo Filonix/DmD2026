@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1E5DB8">
+<title>С Днём города, Домодедово!</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=PT+Serif:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --gold: #FFC93C;
+    --gold-dark: #E6A92E;
+    --red: #D72638;
+    --red-dark: #A41E2C;
+    --blue: #1E5DB8;
+    --blue-light: #4A8FE0;
+    --cream: #FFF8E7;
+    --text: #2A1F1A;
+  }
+
+  html, body {
+    min-height: 100vh;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: var(--text);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    background: linear-gradient(160deg, #1E5DB8 0%, #4A8FE0 30%, #87CEEB 55%, #FFD89B 85%, #FFE5B4 100%);
+    background-attachment: fixed;
+    position: relative;
+    min-height: 100vh;
+  }
+
+  /* === Фон-слайдшоу из папки foto === */
+  .bg-slideshow {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    background: linear-gradient(160deg, #1E5DB8 0%, #4A8FE0 50%, #FFD89B 100%);
+  }
+
+  .bg-slideshow .slide {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0;
+    transform: scale(1.08);
+    transition: opacity 1.6s ease-in-out, transform 8s ease-out;
+    will-change: opacity, transform;
+  }
+
+  .bg-slideshow .slide.active {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+
+  /* Затемнение фона, чтобы текст оставался читаемым */
+  .bg-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    background:
+      radial-gradient(ellipse at center, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.45) 60%, rgba(0,0,0,0.6) 100%),
+      linear-gradient(180deg, rgba(30, 93, 184, 0.25) 0%, rgba(30, 93, 184, 0.15) 50%, rgba(167, 30, 44, 0.2) 100%);
+    pointer-events: none;
+  }
+
+  /* Если фото не загрузились — показываем запасной градиент */
+  .bg-fallback {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background: linear-gradient(160deg, #1E5DB8 0%, #4A8FE0 30%, #87CEEB 55%, #FFD89B 85%, #FFE5B4 100%);
+  }
+
+  /* === Стартовая заставка (до нажатия кнопки / автозапуска) ===
+     Подставьте сюда свой файл: измените URL в .bg-splash ниже.
+     Файл может лежать рядом с HTML, например:  url("start.jpg")
+     или в папке, например:                       url("foto/start.jpg")
+     Поддерживаются JPG, PNG, WebP, AVIF.
+     Рекомендуется горизонтальное фото 1600×900 или больше.
+  */
+  .bg-splash {
+    position: fixed;
+    inset: 0;
+    z-index: 5;
+    background-image: url("start.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: #1E5DB8; /* запасной цвет, если файл не загрузился */
+    opacity: 1;
+    transition: opacity 1.2s ease-in-out;
+  }
+
+  /* Затемнение поверх заставки, чтобы welcome-overlay и кнопка
+     были контрастными и хорошо читались */
+  .bg-splash::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center,
+      rgba(0,0,0,0.25) 0%,
+      rgba(0,0,0,0.45) 60%,
+      rgba(0,0,0,0.6) 100%);
+  }
+
+  /* Когда заставка скрыта — прозрачная, не перехватывает клики */
+  .bg-splash.hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Sun */
+  .sun {
+    position: fixed;
+    top: 6vh;
+    right: 8vw;
+    width: 90px;
+    height: 90px;
+    background: radial-gradient(circle, #FFE259 0%, #FFC93C 60%, rgba(255,201,60,0.3) 80%, transparent 100%);
+    border-radius: 50%;
+    box-shadow: 0 0 80px rgba(255, 201, 60, 0.7);
+    z-index: 2;
+    animation: sunPulse 4s ease-in-out infinite;
+  }
+
+  @keyframes sunPulse {
+    0%, 100% { transform: scale(1); opacity: 0.9; }
+    50% { transform: scale(1.08); opacity: 1; }
+  }
+
+  /* Balloons */
+  .balloons {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 3;
+    overflow: hidden;
+  }
+
+  .balloon {
+    position: absolute;
+    bottom: -180px;
+    width: 50px;
+    height: 65px;
+    border-radius: 50% 50% 50% 50% / 55% 55% 45% 45%;
+    animation: floatUp linear infinite;
+  }
+
+  .balloon::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 10px solid currentColor;
+    opacity: 0.7;
+  }
+
+  .balloon::before {
+    content: '';
+    position: absolute;
+    bottom: -210px;
+    left: 50%;
+    width: 1px;
+    height: 200px;
+    background: rgba(255,255,255,0.4);
+  }
+
+  @keyframes floatUp {
+    0%   { transform: translateY(0) translateX(0) rotate(0deg); }
+    25%  { transform: translateY(-25vh) translateX(25px) rotate(6deg); }
+    50%  { transform: translateY(-55vh) translateX(-18px) rotate(-6deg); }
+    75%  { transform: translateY(-80vh) translateX(18px) rotate(4deg); }
+    100% { transform: translateY(-115vh) translateX(0) rotate(0deg); }
+  }
+
+  /* === Компактный аудио-плеер, закреплённый внизу экрана === */
+  .player {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    z-index: 20;
+    background: rgba(20, 40, 70, 0.82);
+    border-radius: 18px;
+    padding: 12px 14px 10px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    color: #fff;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+
+  .player-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  /* Кнопка Play/Pause */
+  .play-btn {
+    flex-shrink: 0;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, var(--red) 0%, var(--red-dark) 100%);
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(167, 30, 44, 0.55);
+    transition: transform 0.15s, box-shadow 0.15s;
+    padding: 0;
+  }
+
+  .play-btn:active { transform: scale(0.93); }
+
+  .play-btn svg {
+    width: 24px;
+    height: 24px;
+    fill: #fff;
+  }
+
+  .player-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .player-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  .player-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .player-time {
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    color: rgba(255,255,255,0.75);
+    flex-shrink: 0;
+  }
+
+  .progress {
+    height: 4px;
+    background: rgba(255,255,255,0.22);
+    border-radius: 2px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), #FFD86B);
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.1s linear;
+  }
+
+  /* Мини-эквалайзер рядом с названием */
+  .equalizer {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 14px;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+
+  .equalizer span {
+    width: 2px;
+    background: var(--gold);
+    border-radius: 1px;
+    height: 4px;
+  }
+
+  .equalizer.playing span {
+    animation: eq 0.9s ease-in-out infinite;
+  }
+
+  .equalizer span:nth-child(1)  { animation-delay: 0.0s; }
+  .equalizer span:nth-child(2)  { animation-delay: 0.15s; }
+  .equalizer span:nth-child(3)  { animation-delay: 0.3s; }
+  .equalizer span:nth-child(4)  { animation-delay: 0.15s; }
+
+  @keyframes eq {
+    0%, 100% { height: 4px; }
+    50%      { height: 14px; }
+  }
+
+  .hint {
+    text-align: center;
+    font-size: 11px;
+    color: rgba(255,255,255,0.65);
+    margin-top: 8px;
+    min-height: 14px;
+    line-height: 1.3;
+  }
+
+  /* Welcome overlay for first interaction (autoplay workaround) */
+  .welcome-overlay {
+    position: fixed;
+    inset: 0;
+    background: transparent; /* фон-заставка (bg-splash) видна сквозь overlay */
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    text-align: center;
+    transition: opacity 0.6s, visibility 0.6s;
+  }
+
+  .welcome-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .welcome-content {
+    max-width: 380px;
+    color: #fff;
+    animation: welcomeIn 0.7s ease-out;
+  }
+
+  @keyframes welcomeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .welcome-icon {
+    width: 86px;
+    height: 86px;
+    margin: 0 auto 20px;
+    background: linear-gradient(135deg, var(--gold), var(--red));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+    animation: bounce 2s ease-in-out infinite;
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-10px); }
+  }
+
+  .welcome-icon svg {
+    width: 38px;
+    height: 38px;
+    fill: #fff;
+  }
+
+  .welcome-title {
+    font-family: 'PT Serif', Georgia, serif;
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    line-height: 1.2;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.8), 0 1px 3px rgba(0,0,0,0.9);
+  }
+
+  .welcome-text {
+    font-size: 15px;
+    line-height: 1.55;
+    color: rgba(255,255,255,0.95);
+    margin-bottom: 28px;
+    text-shadow: 0 1px 8px rgba(0,0,0,0.8), 0 1px 2px rgba(0,0,0,0.9);
+  }
+
+  .welcome-btn {
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    color: var(--text);
+    border: none;
+    padding: 16px 36px;
+    border-radius: 30px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(255, 201, 60, 0.5);
+    transition: transform 0.2s, box-shadow 0.2s;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .welcome-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 26px rgba(255, 201, 60, 0.6);
+  }
+
+  .welcome-btn svg {
+    width: 20px;
+    height: 20px;
+    fill: var(--text);
+  }
+
+  /* Confetti */
+  .confetti {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 50;
+    overflow: hidden;
+  }
+
+  .confetti-piece {
+    position: absolute;
+    width: 10px;
+    height: 14px;
+    top: -20px;
+    animation: confettiFall linear forwards;
+  }
+
+  @keyframes confettiFall {
+    0%   { transform: translateY(0) rotateZ(0); opacity: 1; }
+    100% { transform: translateY(110vh) rotateZ(720deg); opacity: 0.7; }
+  }
+
+  @media (max-width: 480px) {
+    .sun {
+      width: 56px;
+      height: 56px;
+      top: 4vh;
+      right: 8vw;
+    }
+  }
+
+  /* На очень узких экранах слегка уменьшаем элементы плеера */
+  @media (max-width: 360px) {
+    .play-btn { width: 46px; height: 46px; }
+    .play-btn svg { width: 22px; height: 22px; }
+    .player-label { font-size: 11px; }
+  }
+
+  /* На устройствах с нижней системной панелью — приподнимаем плеер */
+  @media (max-width: 480px) {
+    .player {
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+    }
+  }
+
+  /* Десктоп: уменьшаем ширину плеера, центрируем */
+  @media (min-width: 600px) {
+    .player {
+      left: 50%;
+      right: auto;
+      transform: translateX(-50%);
+      width: 420px;
+      bottom: 24px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- === Фон-слайдшоу из папки foto === -->
+<div class="bg-slideshow" id="bgSlideshow"></div>
+<div class="bg-overlay"></div>
+
+<!-- === Стартовая заставка (поверх фона, под welcome-overlay).
+     Чтобы подставить свою картинку: переименуйте файл в "start.jpg"
+     и положите рядом с HTML, либо измените URL в CSS-классе .bg-splash === -->
+<div class="bg-splash" id="bgSplash"></div>
+
+<div class="sun"></div>
+<div class="balloons" id="balloons"></div>
+<div class="confetti" id="confetti"></div>
+
+<!-- Welcome Overlay (necessary because mobile browsers block autoplay) -->
+<div class="welcome-overlay" id="welcomeOverlay">
+  <div class="welcome-content">
+    <div class="welcome-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+    </div>
+    <div class="welcome-title">С Днём города,<br>Домодедово!</div>
+    <p class="welcome-text">Нажмите кнопку, чтобы прослушать праздничное поздравление, посвящённое нашему любимому городу</p>
+    <button class="welcome-btn" id="welcomeBtn">
+      <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      Прослушать поздравление
+    </button>
+  </div>
+</div>
+
+<!-- === Компактный плеер, закреплённый внизу экрана === -->
+<div class="player" id="player">
+  <div class="player-row">
+    <button class="play-btn" id="playBtn" aria-label="Воспроизвести">
+      <svg viewBox="0 0 24 24" id="playIcon"><path d="M8 5v14l11-7z"/></svg>
+    </button>
+    <div class="player-info">
+      <div class="player-top">
+        <span class="player-label">
+          <span class="equalizer" id="equalizer"><span></span><span></span><span></span><span></span></span>
+          <span id="playLabel">Поздравление</span>
+        </span>
+        <span class="player-time" id="currentTime">0:00</span>
+      </div>
+      <div class="progress" id="progress">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+    </div>
+  </div>
+  <div class="hint" id="hint">Нажмите, чтобы прослушать</div>
+</div>
+
+<!--
+  АУДИОФАЙЛ:
+  По умолчанию страница ищет файл "congratulations.mp3" в той же папке.
+  Чтобы подставить свой файл, измените атрибут src в теге <audio> ниже,
+  либо переименуйте ваш MP3 в "congratulations.mp3" и положите рядом с HTML.
+-->
+<audio id="audio" preload="auto" src="pozdravlenie.mp3"></audio>
+
+<script>
+  // === Фон-слайдшоу из папки foto ===
+  // КОНФИГУРАЦИЯ:
+  //   1. Положите ваши фото в папку "foto" рядом с этим HTML-файлом
+  //   2. Назовите их фото1.jpg, фото2.jpg ... фото20.jpg
+  //      ИЛИ измените массив PHOTOS ниже на свои имена файлов
+  //   3. SLIDE_INTERVAL — частота смены фото (мс), по умолчанию 5000 = 5 секунд
+  //
+  // Поддерживаются: .jpg, .jpeg, .png, .webp, .gif, .avif
+  // Если фото не найдены — будет показан запасной градиент.
+
+  const PHOTOS = [
+    'foto/фото1.jpg',  'foto/фото2.jpg',  'foto/фото3.jpg',  'foto/фото4.jpg',  'foto/фото5.jpg',
+    'foto/фото6.jpg',  'foto/фото7.jpg',  'foto/фото8.jpg',  'foto/фото9.jpg',  'foto/фото10.jpg',
+    'foto/фото11.jpg', 'foto/фото12.jpg', 'foto/фото13.jpg', 'foto/фото14.jpg', 'foto/фото15.jpg',
+    'foto/фото16.jpg', 'foto/фото17.jpg', 'foto/фото18.jpg', 'foto/фото19.jpg', 'foto/фото20.jpg'
+  ];
+  const SLIDE_INTERVAL = 5000; // 5 секунд
+  const SLIDE_TRANSITION = 1600; // длительность плавного перехода (мс), должна совпадать с CSS
+
+  (function initSlideshow() {
+    const container = document.getElementById('bgSlideshow');
+    if (!container) return;
+
+    // Создаём <img> для предзагрузки каждого фото
+    const slides = [];
+    let loadedCount = 0;
+
+    PHOTOS.forEach((src, i) => {
+      const div = document.createElement('div');
+      div.className = 'slide';
+      div.dataset.src = src;
+      container.appendChild(div);
+      slides.push(div);
+
+      const img = new Image();
+      img.onload = () => {
+        div.style.backgroundImage = `url("${src}")`;
+        loadedCount++;
+        if (loadedCount === 1) {
+          // Показать первое фото сразу, как только оно загрузилось
+          div.classList.add('active');
+          startRotation();
+        }
+      };
+      img.onerror = () => {
+        // Фото не загрузилось — убираем его из ротации
+        div.remove();
+        const idx = slides.indexOf(div);
+        if (idx !== -1) slides.splice(idx, 1);
+      };
+      img.src = src;
+    });
+
+    let current = 0;
+    let rotationStarted = false;
+
+    function showNext() {
+      if (slides.length === 0) return;
+      const next = (current + 1) % slides.length;
+      if (next === current) return;
+      slides[next].classList.add('active');
+      slides[current].classList.remove('active');
+      current = next;
+    }
+
+    function startRotation() {
+      if (rotationStarted) return;
+      rotationStarted = true;
+      setInterval(showNext, SLIDE_INTERVAL);
+    }
+  })();
+
+  // === Шарики ===
+  (function createBalloons() {
+    const container = document.getElementById('balloons');
+    const colors = ['#D72638', '#FFC93C', '#1E5DB8', '#E6A92E', '#A41E2C', '#4A8FE0', '#FF8A5C'];
+    const count = 14;
+    for (let i = 0; i < count; i++) {
+      const b = document.createElement('div');
+      b.className = 'balloon';
+      const c = colors[Math.floor(Math.random() * colors.length)];
+      b.style.background = `radial-gradient(circle at 30% 30%, rgba(255,255,255,0.55), ${c})`;
+      b.style.color = c;
+      b.style.left = (Math.random() * 100) + 'vw';
+      b.style.animationDuration = (12 + Math.random() * 10) + 's';
+      b.style.animationDelay = (Math.random() * 18) + 's';
+      const scale = 0.6 + Math.random() * 0.7;
+      b.style.setProperty('--scale', scale);
+      b.style.transform = `scale(${scale})`;
+      container.appendChild(b);
+    }
+  })();
+
+  // === Аудио-плеер ===
+  const audio         = document.getElementById('audio');
+  const playBtn       = document.getElementById('playBtn');
+  const playIcon      = document.getElementById('playIcon');
+  const equalizer     = document.getElementById('equalizer');
+  const progress      = document.getElementById('progress');
+  const progressBar   = document.getElementById('progressBar');
+  const currentTimeEl = document.getElementById('currentTime');
+  const hint          = document.getElementById('hint');
+  const welcomeOverlay = document.getElementById('welcomeOverlay');
+  const welcomeBtn    = document.getElementById('welcomeBtn');
+
+  const PLAY_ICON  = '<path d="M8 5v14l11-7z"/>';
+  const PAUSE_ICON = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+
+  function formatTime(s) {
+    if (isNaN(s) || !isFinite(s)) return '0:00';
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return m + ':' + (sec < 10 ? '0' + sec : sec);
+  }
+
+  function updatePlayUI(playing) {
+    if (playing) {
+      playIcon.innerHTML = PAUSE_ICON;
+      equalizer.classList.add('playing');
+      hint.textContent = 'Идёт воспроизведение...';
+    } else {
+      playIcon.innerHTML = PLAY_ICON;
+      equalizer.classList.remove('playing');
+      hint.textContent = audio.currentTime > 0
+        ? 'На паузе. Нажмите, чтобы продолжить'
+        : 'Нажмите, чтобы прослушать';
+    }
+  }
+
+  function playAudio() {
+    audio.play().then(() => {
+      updatePlayUI(true);
+      hideSplash();
+      launchConfetti();
+    }).catch(err => {
+      console.warn('Воспроизведение не удалось:', err);
+      hint.textContent = 'Файл congratulations.mp3 не найден. Положите его рядом со страницей.';
+    });
+  }
+
+  // === Скрыть стартовую заставку и показать слайдшоу ===
+  let splashHidden = false;
+  function hideSplash() {
+    if (splashHidden) return;
+    splashHidden = true;
+    const splash = document.getElementById('bgSplash');
+    if (splash) splash.classList.add('hidden');
+  }
+
+  function togglePlay() {
+    if (audio.paused) {
+      playAudio();
+    } else {
+      audio.pause();
+      updatePlayUI(false);
+    }
+  }
+
+  playBtn.addEventListener('click', togglePlay);
+
+  audio.addEventListener('timeupdate', () => {
+    if (!audio.duration) return;
+    const pct = (audio.currentTime / audio.duration) * 100;
+    progressBar.style.width = pct + '%';
+    currentTimeEl.textContent = formatTime(audio.currentTime);
+  });
+
+  audio.addEventListener('ended', () => {
+    updatePlayUI(false);
+    progressBar.style.width = '0%';
+    currentTimeEl.textContent = '0:00';
+    audio.currentTime = 0;
+  });
+
+  progress.addEventListener('click', (e) => {
+    const rect = progress.getBoundingClientRect();
+    const pct = (e.clientX - rect.left) / rect.width;
+    if (audio.duration && isFinite(audio.duration)) {
+      audio.currentTime = pct * audio.duration;
+    }
+  });
+
+  // === Welcome overlay (обход блокировки автозапуска на мобильных) ===
+  welcomeBtn.addEventListener('click', () => {
+    welcomeOverlay.classList.add('hidden');
+    setTimeout(() => playAudio(), 350);
+  });
+
+  // === Попытка автозапуска при загрузке страницы ===
+  // На десктопе иногда срабатывает; на мобильных почти всегда требуется
+  // нажатие пользователя — для этого показан welcome-overlay с большой кнопкой.
+  // Пока аудио не запущено — поверх всего видна стартовая заставка (bgSplash).
+  window.addEventListener('load', () => {
+    audio.play().then(() => {
+      updatePlayUI(true);
+      welcomeOverlay.classList.add('hidden');
+      hideSplash();
+      launchConfetti();
+    }).catch(() => {
+      // Автозапуск заблокирован браузером — заставка и overlay с кнопкой остаются видны
+    });
+  });
+
+  // === Конфетти ===
+  function launchConfetti() {
+    const container = document.getElementById('confetti');
+    const colors = ['#FFC93C', '#D72638', '#1E5DB8', '#E6A92E', '#FFFFFF', '#4A8FE0', '#FF8A5C'];
+    const count = 70;
+    for (let i = 0; i < count; i++) {
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      piece.style.left = (Math.random() * 100) + 'vw';
+      piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+      piece.style.animationDuration = (2.5 + Math.random() * 3) + 's';
+      piece.style.animationDelay = (Math.random() * 0.6) + 's';
+      piece.style.transform = `rotate(${Math.random() * 360}deg)`;
+      piece.style.width = (8 + Math.random() * 6) + 'px';
+      piece.style.height = (10 + Math.random() * 8) + 'px';
+      container.appendChild(piece);
+      setTimeout(() => piece.remove(), 6000);
+    }
+  }
+</script>
+</body>
+</html>
